@@ -30,13 +30,17 @@ lImg = np.zeros( (n, m) )
 rImg = np.zeros( (n, m) )
 
 # define k, b, dx, dy
-origK = 1.00
-origB = 5
-origDx = 0.2
-origDy = 0.5
+origK = 1.50
+origB = 0.5
+origDx = -0.2
+origDy = 0.1
 
 lImg, rImg = fu.init_images(n, m, origK, origB, origDx, origDy)
 
+print 'Original k: ', origK
+print 'Original b: ', origB
+print 'Original dx: ', origDx
+print 'Original dy: ', origDy
 
 
 A = lImg
@@ -61,7 +65,9 @@ Ax, Ay = fu.calc_derivatives_Ax_Ay(A)
 sA = sum( sum(A) )
 sB = sum( sum(B) )
 sAB = sum( sum( A*B ) )
+sSqrA = sum( sum( A*A ) )
 sSqrB = sum( sum( B*B ) )
+
 
 sAx = sum( sum(Ax) )
 sAy = sum( sum(Ay) )
@@ -78,43 +84,61 @@ sAxAy = sum( sum(Ax*Ay) )
 #Actually, we calculated k^-1 and -b/k
 #My fault, now too lazy to rewrite
 
-a11 = sSqrB
-a12 = sB
-a21 = sB
-a22 = n*n
-b1 = sAB
-b2 = sA
+#a11 = sSqrB
+#a12 = sB
+#a21 = sB
+#a22 = n*m
+#b1 = sAB
+#b2 = sA
 
 
-k, b = fu.kramer_solve_SLE_2(a11, a12, a21, a22, b1, b2)
-k = 1/k
-b = -k*b
-
-# Calculating dx, dy
-
-a11 = sSqrAx
-a12 = sAxAy
-a21 = sAxAy
-a22 = sSqrAy
-b1 = (sBAx - k * sAAx - b * sAx) / k
-b2 = (sBAy - k * sAAy - b * sAy) / k
+#k, b = fu.kramer_solve_SLE_2(a11, a12, a21, a22, b1, b2)
+#k = 1/k
+#b = -k*b
 
 
-dx, dy = fu.kramer_solve_SLE_2(a11, a12, a21, a22, b1, b2)
+k = 1
+b = 0
+dx = 0
+dy = 0
 
-print 'Original k: ', origK
-print 'Original b: ', origB
-print 'Original dx: ', origDx
-print 'Original dy: ', origDy
-
-
-print 'Calculated k: ', k, '\n'
-print 'Calculated b: ', b, '\n'
-print 'Calculated dx: ', dx, '\n'
-print 'Calculated dy: ', dy, '\n'
+while True:
 
 
+    # 2) Calculating k, b 
+    a11 = sSqrA + \
+    dx * ( 2 * sAAx + dx * sSqrAx + dy * sAxAy ) + \
+    dy * ( 2 * sAAy + dx * sAxAy + dy * sSqrA )
 
+    a12 = sA + dx * sAx + dy * sAy
+    a21 = sA + dx * sAx + dy * sAy
+    a22 = n*m
+    b1 = sAB + dx * sBAx + dy * sBAy
+    b2 = sB
+
+
+    k, b = fu.kramer_solve_SLE_2(a11, a12, a21, a22, b1, b2)
+
+
+
+    # 1) Calculating dx, dy
+
+    a11 = sSqrAx
+    a12 = sAxAy
+    a21 = sAxAy
+    a22 = sSqrAy
+    b1 = (sBAx - k * sAAx - b * sAx) / k
+    b2 = (sBAy - k * sAAy - b * sAy) / k
+
+
+    dx, dy = fu.kramer_solve_SLE_2(a11, a12, a21, a22, b1, b2)
+
+
+    print 'Calculated k: ', k, '\n'
+    print 'Calculated b: ', b, '\n'
+    print 'Calculated dx: ', dx, '\n'
+    print 'Calculated dy: ', dy, '\n'
+    raw_input("Press Enter for next iteration\n")
 
 
 # --- PLOTTING ---

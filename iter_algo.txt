@@ -1,0 +1,11 @@
+
+Iterations algorithm idea:
+
+while True:
+    1) fix k = 1, b = 0
+        -> find dx, dy
+    2) fix dx, dy
+        -> find k, b
+    
+    print k, b, dx, dy
+    raw_input()
